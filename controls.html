@@ -131,6 +131,7 @@
         <button
           class="w-full bg-nord-11/10 hover:bg-nord-11/20 text-nord-11 font-bold py-4 px-6 rounded-theme border border-nord-11/20 transition-colors duration-200 uppercase tracking-widest text-xs flex items-center justify-center space-x-2"
           type="button"
+          id = "stopBtn" 
         >
           <span class="material-symbols-outlined text-lg">stop_circle</span>
           <span>Stop Presentation</span>
@@ -143,8 +144,9 @@
     <script>
       (function () {
         const castCode = "{{CAST_CODE}}";
+        const protocol = window.location.protocol === 'https:' ? 'wss://' : 'ws://';
         const WS_URL =
-          "ws://matwa.is-cool.dev/ws/?cast_code=" + castCode + "&type=controller";
+          protocol + "matwa.is-cool.dev/ws/?cast_code=" + castCode + "&type=controller";
 
         let socket = null;
         let currentSlide = 1;
@@ -247,7 +249,7 @@
         document
           .getElementById("prevBtn")
           .addEventListener("click", () => sendCommand("prev"));
-        document.querySelector("button").addEventListener("click", () => {
+        document.getElementById("stopBtn").addEventListener("click", () => {
           if (confirm("Stop presentation?")) {
             socket.close();
             window.location.href = "/";
