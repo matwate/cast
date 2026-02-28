@@ -13,7 +13,7 @@ YELLOW='\033[1;33m'
 NC='\033[0m' # No Color
 
 # WebSocket URL - can be overridden via environment
-export WEBSOCKET_URL="${WEBSOCKET_URL:-ws://localhost:8080}"
+export WEBSOCKET_URL="${WEBSOCKET_URL:-ws://matwa.is-cool.dev/ws/}"
 
 npm i
 
