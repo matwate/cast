@@ -16,7 +16,7 @@ const qr_output_dir: String = "./qr"
 
 pub const server_ip: String = "https://matwa.is-cool.dev"
 
-pub const websocket_url: String = "ws://localhost:8080"
+pub const websocket_url: String = "ws://matwa.is-cool.dev/ws/" 
 
 type ThisThingError {
   NoUsername
