@@ -1,7 +1,7 @@
 # REALLY IMPORTANT NOTE 
 
 Ai wrote this readme, i apologize, i did read and removed the wrong and cringey things but still, this is written by ai
-
+The UI is vibe coded, i apolozize, i do not wanna touch javascript with a 10 foot pole.
 
 # Cast - Remote Presentation Control System
 
