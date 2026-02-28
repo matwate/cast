@@ -13,6 +13,8 @@ NC='\033[0m' # No Color
 # WebSocket URL - can be overridden via environment
 export WEBSOCKET_URL="${WEBSOCKET_URL:-ws://localhost:8080}"
 
+npm i
+
 echo -e "${GREEN}🚀 Starting Cast Application${NC}"
 echo -e "${YELLOW}📡 WebSocket URL: $WEBSOCKET_URL${NC}"
 echo ""
