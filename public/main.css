@@ -1,0 +1,24 @@
+@import "tailwindcss";
+
+
+@theme {
+  --color-brand: #136dec;
+  --color-brand-hover: #0f5ac8;
+  --color-nord-0: #2e3440;
+  --color-nord-1: #3b4252;
+  --color-nord-2: #434c5e;
+  --color-nord-3: #4c566a;
+  --color-nord-4: #d8dee9;
+  --color-nord-5: #e5e9f0;
+  --color-nord-6: #eceff4;
+  --color-nord-7: #8fbcbb;
+  --color-nord-8: #88c0d0;
+  --color-nord-9: #81a1c1;
+  --color-nord-10: #5e81ac;
+  --color-nord-11: #bf616a;
+  --radius-theme: 16px;
+  --radius-button: 24px;
+}
+@variant dark (&:where(.dark, .dark *));import "tailwindcss"; 
+
+

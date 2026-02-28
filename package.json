@@ -1,0 +1,18 @@
+{
+  "name": "my-app",
+  "version": "1.0.0",
+  "private": true,
+  "dependencies": {
+    "@tailwindcss/postcss": "^4.2.1",
+    "hyperscript.org": "^0.9.14",
+    "reveal.js": "^4.6.1",
+    "ws": "^8.19.0"
+  },
+  "devDependencies": {
+    "@tailwindcss/container-queries": "^0.1.1",
+    "@tailwindcss/forms": "^0.5.11",
+    "autoprefixer": "^10.4.20",
+    "postcss": "^8.4.49",
+    "tailwindcss": "^4.2.1"
+  }
+}

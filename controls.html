@@ -1,0 +1,230 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <title>Cast - Mobile Remote Controls</title>
+    <link rel="stylesheet" href="/assets/css/variables.css" />
+    <link rel="stylesheet" href="/assets/css/material-symbols.css" />
+    <link rel="stylesheet" href="/assets/css/main.css" /
+  <script src="https://cdn.tailwindcss.com"></script>
+    <style data-purpose="layout-and-interactions">
+      body {
+        background-color: var(--bg-primary);
+        color: var(--text-primary);
+      }
+      .control-btn {
+        transition: all var(--transition-fast) ease;
+      }
+      .control-btn:active {
+        transform: scale(0.97);
+      }
+    </style>
+  </head>
+  <body
+    class="min-h-screen flex items-center justify-center font-sans antialiased p-4"
+  >
+    <main
+      class="w-full max-w-sm flex flex-col justify-between min-h-[85vh] text-center"
+      data-purpose="landing-content"
+    >
+      <header class="space-y-1 pt-6">
+        <div class="flex items-center justify-center gap-2 mb-2">
+          <h1
+            class="text-5xl font-light tracking-tighter text-nord-0 lowercase"
+            data-purpose="site-logo"
+          >
+            cast
+          </h1>
+          <div id="connectionStatus" class="flex items-center gap-1">
+            <span class="material-symbols-outlined text-xl text-yellow-500 animate-pulse" id="statusIcon">
+              sync
+            </span>
+            <span id="statusText" class="text-xs font-semibold text-yellow-600 uppercase tracking-wide">
+              Connecting...
+            </span>
+          </div>
+        </div>
+        <p class="text-nord-3 text-xs font-medium uppercase tracking-widest">
+        Remote your slides 
+        </p>
+      </header>
+      <section
+        class="flex-grow flex flex-col justify-center space-y-6 py-8"
+        data-purpose="remote-controls"
+      >
+        <div class="flex justify-center items-center">
+          <div
+            class="bg-white/50 backdrop-blur-sm px-4 py-2 rounded-full border border-nord-4"
+          >
+            <span class="text-nord-3 text-lg font-medium tracking-wide"
+              >Slide
+              <span id="currentSlide" class="text-nord-10 font-bold text-2xl"
+                >1</span
+              >
+              <span class="text-nord-4">/</span>
+              <span id="totalSlides">?</span></span
+            >
+          </div>
+        </div>
+        <div class="flex flex-col gap-4 flex-grow justify-center">
+          <button
+            id="nextBtn"
+            class="control-btn h-40 flex flex-col items-center justify-center bg-nord-10 hover:bg-nord-9 active:bg-nord-9 text-white rounded-button shadow-lg shadow-nord-10/20 border border-transparent group w-full"
+            type="button"
+          >
+            <span class="material-symbols-outlined text-5xl mb-1"
+              >arrow_forward</span
+            >
+            <span class="text-lg font-bold uppercase tracking-widest"
+              >Next</span
+            >
+          </button>
+          <button
+            id="prevBtn"
+            class="control-btn h-24 flex flex-row items-center justify-center bg-white hover:bg-nord-5 text-nord-3 rounded-button shadow-sm border border-nord-4 group w-full gap-2"
+            type="button"
+          >
+            <span
+              class="material-symbols-outlined text-2xl group-hover:text-nord-2 transition-colors"
+              >arrow_back</span
+            >
+            <span
+              class="text-sm font-bold uppercase tracking-wider group-hover:text-nord-2 transition-colors"
+              >Previous</span
+            >
+          </button>
+        </div>
+      </section>
+      <footer class="pb-6 space-y-6">
+        <button
+          class="w-full bg-nord-11/10 hover:bg-nord-11/20 text-nord-11 font-bold py-4 px-6 rounded-theme border border-nord-11/20 transition-colors duration-200 uppercase tracking-widest text-xs flex items-center justify-center space-x-2"
+          type="button"
+        >
+          <span class="material-symbols-outlined text-lg">stop_circle</span>
+          <span>Stop Presentation</span>
+        </button>
+        <p class="text-nord-3 text-xs opacity-50">
+        Connected as <span class="font-semibold text-nord-10">{{USERNAME}}</span>
+        </p>
+      </footer>
+    </main>
+    <script>
+      (function () {
+        const castCode = "{{CAST_CODE}}";
+        const WS_URL =
+          "ws://localhost:8080/?cast_code=" + castCode + "&type=controller";
+
+        let socket = null;
+        let currentSlide = 1;
+        let totalSlides = 0;
+
+        function updateConnectionStatus(status) {
+          const statusIcon = document.getElementById("statusIcon");
+          const statusText = document.getElementById("statusText");
+          const nextBtn = document.getElementById("nextBtn");
+          const prevBtn = document.getElementById("prevBtn");
+
+          switch (status) {
+            case "connecting":
+              statusIcon.textContent = "sync";
+              statusIcon.className = "material-symbols-outlined text-xl text-yellow-500 animate-pulse";
+              statusText.textContent = "Connecting...";
+              statusText.className = "text-xs font-semibold text-yellow-600 uppercase tracking-wide";
+              nextBtn.disabled = true;
+              prevBtn.disabled = true;
+              nextBtn.classList.add("opacity-50", "cursor-not-allowed");
+              prevBtn.classList.add("opacity-50", "cursor-not-allowed");
+              break;
+            case "connected":
+              statusIcon.textContent = "check_circle";
+              statusIcon.className = "material-symbols-outlined text-xl text-green-500";
+              statusText.textContent = "Connected";
+              statusText.className = "text-xs font-semibold text-green-600 uppercase tracking-wide";
+              nextBtn.disabled = false;
+              prevBtn.disabled = false;
+              nextBtn.classList.remove("opacity-50", "cursor-not-allowed");
+              prevBtn.classList.remove("opacity-50", "cursor-not-allowed");
+              break;
+            case "disconnected":
+              statusIcon.textContent = "cancel";
+              statusIcon.className = "material-symbols-outlined text-xl text-red-500";
+              statusText.textContent = "Disconnected";
+              statusText.className = "text-xs font-semibold text-red-600 uppercase tracking-wide";
+              nextBtn.disabled = true;
+              prevBtn.disabled = true;
+              nextBtn.classList.add("opacity-50", "cursor-not-allowed");
+              prevBtn.classList.add("opacity-50", "cursor-not-allowed");
+              break;
+            case "error":
+              statusIcon.textContent = "error";
+              statusIcon.className = "material-symbols-outlined text-xl text-red-500";
+              statusText.textContent = "Connection Error";
+              statusText.className = "text-xs font-semibold text-red-600 uppercase tracking-wide";
+              nextBtn.disabled = true;
+              prevBtn.disabled = true;
+              nextBtn.classList.add("opacity-50", "cursor-not-allowed");
+              prevBtn.classList.add("opacity-50", "cursor-not-allowed");
+              break;
+          }
+        }
+
+        function connect() {
+          updateConnectionStatus("connecting");
+          socket = new WebSocket(WS_URL);
+
+          socket.onopen = () => {
+            console.log("Connected to control server");
+            updateConnectionStatus("connected");
+          };
+
+          socket.onmessage = (event) => {
+            const data = JSON.parse(event.data);
+            if (data.type === "state") {
+              currentSlide = data.indexh + 1;
+              totalSlides = data.total;
+              updateSlideDisplay();
+            }
+          };
+
+          socket.onclose = () => {
+            console.log("Disconnected, reconnecting in 3s...");
+            updateConnectionStatus("disconnected");
+            setTimeout(connect, 3000);
+          };
+
+          socket.onerror = (error) => {
+            console.error("WebSocket error:", error);
+            updateConnectionStatus("error");
+          };
+        }
+
+        function updateSlideDisplay() {
+          document.getElementById("currentSlide").textContent = currentSlide;
+          document.getElementById("totalSlides").textContent = totalSlides;
+        }
+
+        function sendCommand(action) {
+          if (socket && socket.readyState === WebSocket.OPEN) {
+            socket.send(JSON.stringify({ type: "cmd", action }));
+          }
+        }
+
+        document
+          .getElementById("nextBtn")
+          .addEventListener("click", () => sendCommand("next"));
+        document
+          .getElementById("prevBtn")
+          .addEventListener("click", () => sendCommand("prev"));
+        document.querySelector("button").addEventListener("click", () => {
+          if (confirm("Stop presentation?")) {
+            socket.close();
+            window.location.href = "/";
+          }
+        });
+
+        connect();
+      })();
+    </script>
+  </body>
+</html>

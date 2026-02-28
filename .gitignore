@@ -1,0 +1,32 @@
+*.beam
+*.ez
+/build
+erl_crash.dump
+
+# Node
+node_modules/
+package-lock.json
+
+# Generated assets
+public/assets/vendor/
+public/assets/css/main.css
+public/assets/css/*.css
+
+# Generated presentations
+slides/
+view/
+qr/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+
