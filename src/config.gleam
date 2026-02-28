@@ -18,7 +18,7 @@ pub fn get_config() -> Config {
   // Default: ws://localhost:8080
   // Set this in your .bashrc or before running the application
 
-  let ws_url = "ws://localhost:8080"
+  let ws_url = "ws://matwa.is-cool.dev/ws/" 
 
   Config(
     server_host: "0.0.0.0",
