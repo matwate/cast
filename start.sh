@@ -1,6 +1,8 @@
 #!/bin/bash
 set -e
 
+./setup.sh # To ensure shit works. 
+
 # Cast Application - Startup Script
 # Starts both WebSocket relay and Gleam server
 
