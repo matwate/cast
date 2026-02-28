@@ -10,74 +10,46 @@
     flake-utils.lib.eachDefaultSystem (system:
       let
         pkgs = nixpkgs.legacyPackages.${system};
-      in {
 
-        ##################################
-        # 📦 PACKAGE (your app)
-        ##################################
-
-        packages.default = pkgs.writeShellApplication {
+        castApp = pkgs.writeShellApplication {
           name = "cast";
 
           runtimeInputs = with pkgs; [
+	  erlang
             bash
             coreutils
-            gleam
             nodejs_22
+            gleam
             rebar3
-          ];
-
-          buildInputs = with pkgs; [
-            poppler_utils
+            poppler-utils
             libreoffice-fresh
             pngquant
             qrrs
           ];
 
           text = ''
-            #!/usr/bin/env bash
             set -e
 
             export WEBSOCKET_URL="''${WEBSOCKET_URL:-ws://localhost:8080}"
 
-            echo "🚀 Starting Cast Application"
+            echo "🚀 Starting Cast via start.sh"
 
-            trap 'echo "🛑 Shutting down Cast"; jobs -p | xargs -r kill; exit 0' SIGINT SIGTERM
-
-            node $PWD/websocket_relay.js &
-            WS_PID=$!
-
-            sleep 2
-            kill -0 $WS_PID 2>/dev/null || exit 1
-
-            gleam run &
-            GLEAM_PID=$!
-
-            sleep 2
-            kill -0 $GLEAM_PID 2>/dev/null || { kill $WS_PID; exit 1; }
-
-            wait
-          '';
+            exec ${./start.sh} '';
         };
-
-        ##################################
-        # 🚀 APP (what nix run executes)
-        ##################################
-
+      in {
         apps.default = {
           type = "app";
-          program = "${self.packages.${system}.default}/bin/cast";
+          program = "${castApp}/bin/cast";
         };
 
-        ##################################
-        # 🧪 DEV SHELL
-        ##################################
+        packages.default = castApp;
 
         devShells.default = pkgs.mkShell {
           buildInputs = with pkgs; [
+	  erlang
             gleam
             nodejs_22
-            poppler_utils
+            poppler-utils
             libreoffice-fresh
             pngquant
             qrrs
@@ -86,6 +58,5 @@
             rebar3
           ];
         };
-
       });
 }
