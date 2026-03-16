@@ -14,9 +14,9 @@ const view_output_dir: String = "./view/"
 
 const qr_output_dir: String = "./qr"
 
-pub const server_ip: String = "https://matwa.is-cool.dev"
+pub const server_ip: String = "https://cast.matwa.is-cool.dev"
 
-pub const websocket_url: String = "ws://matwa.is-cool.dev/ws/"
+pub const websocket_url: String = "ws://cast.matwa.is-cool.dev/ws/"
 
 type ThisThingError {
   NoUsername
@@ -351,7 +351,7 @@ fn generate_html_from_pngs(
     <script>
       (function() {
         const protocol = window.location.protocol === 'https:' ? 'wss://' : 'ws://';
-        const WS_URL = protocol + 'matwa.is-cool.dev/ws/?cast_code=" <> cast_code <> "&type=presentation';
+        const WS_URL = protocol + 'cast.matwa.is-cool.dev/ws/?cast_code=" <> cast_code <> "&type=presentation';
         let socket = null;
         let reconnectTimeout = null;
 

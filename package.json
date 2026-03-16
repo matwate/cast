@@ -8,6 +8,10 @@
     "reveal.js": "^4.6.1",
     "ws": "^8.19.0"
   },
+  "scripts": {
+    "build:css": "node build-css.js",
+    "dev": "node build-css.js"
+  },
   "devDependencies": {
     "@tailwindcss/container-queries": "^0.1.1",
     "@tailwindcss/forms": "^0.5.11",

@@ -16,6 +16,11 @@ curl -sL "https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wgh
 
 echo "✓ Fonts downloaded"
 
+# Build Tailwind CSS
+echo "🎨 Building Tailwind CSS..."
+npm run build:css
+echo "✓ Tailwind CSS built"
+
 # Copy vendor libraries
 echo "📚 Copying vendor libraries..."
 mkdir -p public/assets/vendor

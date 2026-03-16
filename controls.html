@@ -6,11 +6,11 @@
     <title>Cast - Mobile Remote Controls</title>
     <link rel="stylesheet" href="/assets/css/variables.css" />
     <link rel="stylesheet" href="/assets/css/material-symbols.css" />
-    <link rel="stylesheet" href="/assets/css/main.css" /> 
-  <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="/assets/css/main.css" />
+    <link rel="stylesheet" href="/assets/css/tailwind.css" />
    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0&display=swap" />
-    
-    
+
+
     <!-- Add this fallback for icons in case Google Fonts fails -->
     <style>
       .material-symbols-outlined {
@@ -40,36 +40,6 @@
         transform: scale(0.97);
       }
     </style>
-<script>
-    tailwind.config = {
-      theme: {
-        extend: {
-          colors: {
-            brand: '#136dec',
-            nord: {
-              0: '#2e3440',
-              1: '#3b4252',
-              2: '#434c5e',
-              3: '#4c566a',
-              4: '#d8dee9',
-              5: '#e5e9f0',
-              6: '#eceff4',
-              7: '#8fbcbb',
-              8: '#88c0d0',
-              9: '#81a1c1',
-              10: '#5e81ac',
-            }
-          },
-          fontFamily: {
-            sans: ['Inter', 'sans-serif'],
-          },
-          borderRadius: {
-            'theme': '8px',
-          }
-        }
-      }
-    }
-  </script>
  
   </head>
   <body
@@ -166,7 +136,7 @@
         const castCode = "{{CAST_CODE}}";
         const protocol = window.location.protocol === 'https:' ? 'wss://' : 'ws://';
         const WS_URL =
-          protocol + "matwa.is-cool.dev/ws/?cast_code=" + castCode + "&type=controller";
+          protocol + "cast.matwa.is-cool.dev/ws/?cast_code=" + castCode + "&type=controller";
 
         let socket = null;
         let currentSlide = 1;
