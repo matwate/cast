@@ -18,6 +18,34 @@ echo "✓ Fonts downloaded"
 
 # Build Tailwind CSS
 echo "🎨 Building Tailwind CSS..."
+
+       # Create tailwind-source.css if it doesn't exist
+if [ ! -f "public/assets/css/tailwind-source.css" ]; then
+  echo "📝 Creating tailwind-source.css..."
+  cat > public/assets/css/tailwind-source.css << 'EOF'
+@import "tailwindcss";
+@theme {
+  --color-brand: #136dec;
+  --color-nord-0: #2e3440;
+  --color-nord-1: #3b4252;
+  --color-nord-2: #434c5e;
+  --color-nord-3: #4c566a;
+  --color-nord-4: #d8dee9;
+  --color-nord-5: #e5e9f0;
+  --color-nord-6: #eceff4;
+  --color-nord-7: #8fbcbb;
+  --color-nord-8: #88c0d0;
+  --color-nord-9: #81a1c1;
+  --color-nord-10: #5e81ac;
+  --radius-theme: 8px;
+  --radius-button: 24px;
+}
+@variant dark (&:where(.dark, .dark *));
+EOF
+  echo "✓ tailwind-source.css created"
+fi
+
+
 npm run build:css
 echo "✓ Tailwind CSS built"
 
