@@ -37,20 +37,26 @@ wss.on("connection", (ws, req) => {
   }
 
   if (clientType === "presentation") {
-    // Store presentation client by cast code
-    presentations.set(castCode, ws);
+    if (!presentations.has(castCode)) {
+      presentations.set(castCode, []);
+    }
+    presentations.get(castCode).push(ws);
 
     ws.on("message", (data) => {
       const message = JSON.parse(data);
 
       if (message.type === "state") {
         broadcastToControllers(castCode, message);
+        broadcastToPresentations(castCode, message, ws);
       }
     });
 
     ws.on("close", () => {
       console.log(`Presentation disconnected for cast code: ${castCode}`);
-      presentations.delete(castCode);
+      const presentationList = presentations.get(castCode);
+      if (presentationList) {
+        presentations.set(castCode, presentationList.filter((client) => client !== ws));
+      }
     });
   } else {
     // Store controller client by cast code
@@ -63,10 +69,7 @@ wss.on("connection", (ws, req) => {
       const message = JSON.parse(data);
 
       if (message.type === "cmd") {
-        const presentation = presentations.get(castCode);
-        if (presentation && presentation.readyState === WebSocket.OPEN) {
-          presentation.send(JSON.stringify(message));
-        }
+        broadcastToPresentations(castCode, message);
       }
     });
 
@@ -83,6 +86,17 @@ wss.on("connection", (ws, req) => {
     console.error(`WebSocket error for cast code ${castCode}: ${error.message}`);
   });
 });
+
+function broadcastToPresentations(castCode, message, excludeWs = null) {
+  const presentationList = presentations.get(castCode);
+  if (presentationList) {
+    presentationList.forEach((client) => {
+      if (client !== excludeWs && client.readyState === WebSocket.OPEN) {
+        client.send(JSON.stringify(message));
+      }
+    });
+  }
+}
 
 function broadcastToControllers(castCode, message) {
   const controllerList = controllers.get(castCode);
