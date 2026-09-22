@@ -77,7 +77,7 @@ gleam run
 ### Example: Custom WebSocket URL
 
 ```bash
-export WEBSOCKET_URL='ws://matwa.is-cool.dev/ws/'
+export WEBSOCKET_URL='ws://matwa.dev/ws/'
 gleam run
 ```
 

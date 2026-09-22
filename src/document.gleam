@@ -14,9 +14,9 @@ const view_output_dir: String = "./view/"
 
 const qr_output_dir: String = "./qr"
 
-pub const server_ip: String = "https://cast.matwa.is-cool.dev"
+pub const server_ip: String = "https://cast.matwa.dev"
 
-pub const websocket_url: String = "ws://cast.matwa.is-cool.dev/ws/"
+pub const websocket_url: String = "ws://cast.matwa.dev/ws/"
 
 type ThisThingError {
   NoUsername
@@ -80,6 +80,7 @@ pub fn handle_convert(req: wisp.Request, ctx: types.Context) -> wisp.Response {
 fn generate_qr_code(cast_code: String) -> Result(Nil, List(#(String, String))) {
   let qr_url = server_ip <> "/controls/" <> cast_code
   let qr_path = qr_output_dir <> "/" <> cast_code <> ".png"
+  let _ = simplifile.create_directory_all(qr_output_dir)
 
   case
     gleamyshell.execute("qrrs", in: ".", args: [
@@ -351,7 +352,7 @@ fn generate_html_from_pngs(
     <script>
       (function() {
         const protocol = window.location.protocol === 'https:' ? 'wss://' : 'ws://';
-        const WS_URL = protocol + 'cast.matwa.is-cool.dev/ws/?cast_code=" <> cast_code <> "&type=presentation';
+        const WS_URL = protocol + 'cast.matwa.dev/ws/?cast_code=" <> cast_code <> "&type=presentation';
         let socket = null;
         let reconnectTimeout = null;
 

@@ -4,197 +4,161 @@
   <head>
     <meta charset="utf-8" />
     <meta content="width=device-width, initial-scale=1.0" name="viewport" />
-    <title>cast - Remote for  your slides</title>
-    <!-- CSS Variables -->
-    <link rel="stylesheet" href="/assets/css/variables.css" />
-    <link rel="stylesheet" href="/assets/css/public-sans.css" />
-    <link rel="stylesheet" href="/assets/css/material-symbols.css" />
-    <!-- Tailwind CSS -->
-    
-    <link rel="stylesheet" href="/assets/css/main.css" />
-    <link rel="stylesheet" href="/assets/css/tailwind.css" />
-   <!-- Hyperscript -->
+    <title>cast - Remote for your slides</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;600;700;800&family=Space+Mono:wght@400;700&display=swap"
+    />
+    <link rel="stylesheet" href="/assets/spot.css" />
+    <!-- Hyperscript -->
     <script src="/assets/vendor/_hyperscript.min.js"></script>
-    <!-- Material Icons -->
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Icons" />
-    <!-- BEGIN: Custom Styles -->
-    <style data-purpose="layout-and-interactions">
-      body {
-        background-color: #eceff4; /* Nord 6 */
-        color: #2e3440; /* Nord 0 */
+    <style>
+      form {
+        display: flex;
+        flex-direction: column;
+        gap: var(--space-5);
       }
       .drop-zone {
-        transition: all 0.3s ease;
-        border: 2px dashed #d8dee9;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: var(--space-2);
+        min-height: 224px;
+        cursor: pointer;
+        text-align: center;
       }
-      .drop-zone:hover,
       .drop-zone.dragover {
-        border-color: #136dec;
-        background-color: rgba(19, 109, 236, 0.05);
+        background: var(--shade);
+        color: var(--on-shade);
       }
-      .invalid {
-        border-color: #bf616a !important;
+      .drop-zone.dragover .spot-label {
+        color: var(--on-shade);
+      }
+      .drop-zone.invalid::before,
+      .drop-zone.invalid::after,
+      .drop-zone.invalid > .spot-frame__in::before,
+      .drop-zone.invalid > .spot-frame__in::after {
+        border-color: var(--ink);
+        width: 24px;
+        height: 24px;
+      }
+      .drop-zone.invalid::before { border-top-width: 2px; border-left-width: 2px; }
+      .drop-zone.invalid::after { border-top-width: 2px; border-right-width: 2px; }
+      .drop-zone.invalid > .spot-frame__in::before { border-bottom-width: 2px; border-left-width: 2px; }
+      .drop-zone.invalid > .spot-frame__in::after { border-bottom-width: 2px; border-right-width: 2px; }
+      .file-name {
+        font-weight: 600;
+        word-break: break-all;
       }
     </style>
-    <!-- END: Custom Styles -->
   </head>
-  <body
-    class="min-h-screen flex items-center justify-center font-sans antialiased p-6"
-  >
-    <!-- BEGIN: MainContainer -->
-    <main
-      class="w-full max-w-md space-y-12 text-center"
-      data-purpose="landing-content"
-    >
-      <!-- BEGIN: HeaderSection -->
-      <header class="space-y-2">
-        <h1
-          class="text-6xl font-light tracking-tighter text-nord-0 lowercase"
-          data-purpose="site-logo"
-        >
-          cast
-        </h1>
-        <p class="text-nord-3 text-sm font-medium uppercase tracking-widest">
-          Remote for your slides
+  <body>
+    <main class="page">
+      <header style="display: flex; flex-direction: column; gap: var(--space-4)">
+        <span class="spot-label">Cast</span>
+        <h1 class="spot-hero">Remote<br />for your<br />slides.</h1>
+        <p class="lead">
+          Upload a PDF or PPTX, then drive it from your phone.
         </p>
       </header>
-      <!-- END: HeaderSection -->
-      <!-- BEGIN: InputSection -->
-      <section class="space-y-8" data-purpose="user-input-form">
-        <form action="/convert" method="POST" enctype="multipart/form-data">
-          <!-- Username Field -->
-          <div class="space-y-2 text-left">
-            <label
-              class="block text-xs font-bold text-nord-3 uppercase ml-1"
-              for="username"
-              >Username</label
-            >
-            <input
-              name="username"
-              _="on change  if my.value is empty add .invalid else remove .invalid end on input if my.value is empty add .invalid else remove .invalid end"
-              class="w-full bg-white border-nord-4 text-nord-0 placeholder-nord-3/50 px-4 py-3 focus:ring-brand focus:border-brand rounded-theme shadow-sm transition-all"
-              id="username"
-              placeholder="e.g. snowflake"
-              type="text"
-            />
+
+      <form action="/convert" method="POST" enctype="multipart/form-data">
+        <section class="spot-section">
+          <label class="spot-label" for="username">Username</label>
+          <input
+            name="username"
+            _="on change  if my.value is empty add .invalid else remove .invalid end on input if my.value is empty add .invalid else remove .invalid end"
+            class="field"
+            id="username"
+            placeholder="e.g. snowflake"
+            type="text"
+          />
+          <p class="meta error-note">* Enter a username</p>
+        </section>
+
+        <section class="spot-section">
+          <span class="spot-label">Upload File</span>
+          <div class="spot-frame drop-zone" id="dropZone">
+            <div class="spot-frame__in"></div>
+            <p class="lead">Drop your file here</p>
+            <p class="meta">or click to browse · PDF, PPTX</p>
           </div>
-          <!-- File Upload Area -->
-          <div class="space-y-2 text-left">
-            <label class="block text-xs font-bold text-nord-3 uppercase ml-1"
-              >Upload File</label
-            >
-            <div
-              class="drop-zone w-full aspect-video bg-white rounded-theme flex flex-col items-center justify-center cursor-pointer p-8"
-              data-purpose="file-upload-container"
-              id="dropZone"
-            >
-              <div class="p-3 bg-nord-6 rounded-full mb-4">
-                <svg
-                  class="h-6 w-6 text-nord-10"
-                  fill="none"
-                  stroke="currentColor"
-                  viewbox="0 0 24 24"
-                  xmlns="http://www.w3.org/2000/svg"
-                >
-                  <path
-                    d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                    stroke-width="2"
-                  ></path>
-                </svg>
-              </div>
-              <p class="text-nord-2 font-medium">Drop your file here</p>
-              <p class="text-nord-3 text-xs mt-1">or click to browse</p>
-            </div>
-            <input name="data" class="hidden" id="fileInput" type="file" accept=".pptx, .pdf, application/pdf, application/vnd.openxmlformats-officedocument.presentationml.presentation" />
-          </div>
-          <div class="pt-4">
-            <button
-              _="on click
-                set usernameInput to #username
-                set fileInput to #fileInput
-                if usernameInput.value is empty
-                  add .invalid to usernameInput
-                end
-                if fileInput.files.length is 0
-                  add .invalid to #dropZone
-                end
-                if usernameInput.value is empty or fileInput.files.length is 0
-                  halt the event
-                end"
-              class="w-full bg-nord-10 hover:bg-nord-9 text-white font-bold py-3 px-6 rounded-theme shadow-sm transition-colors duration-200 uppercase tracking-widest text-xs"
-              data-purpose="send-button"
-              type="submit"
-            >
-              Send File
-            </button>
-          </div>
-        </form>
-      </section>
-      <!-- END: InputSection -->
-      <!-- BEGIN: Footer -->
-      <footer class="pt-12">
-        <p class="text-nord-3 text-xs opacity-50">Simple. Private. Fast.</p>
+          <p class="meta error-note">* Choose a file</p>
+          <input
+            name="data"
+            hidden
+            id="fileInput"
+            type="file"
+            accept=".pptx, .pdf, application/pdf, application/vnd.openxmlformats-officedocument.presentationml.presentation"
+          />
+        </section>
+
+        <div>
+          <button
+            _="on click
+              set usernameInput to #username
+              set fileInput to #fileInput
+              if usernameInput.value is empty
+                add .invalid to usernameInput
+              end
+              if fileInput.files.length is 0
+                add .invalid to #dropZone
+              end
+              if usernameInput.value is empty or fileInput.files.length is 0
+                halt the event
+              end"
+            class="spot-button spot-button--accent spot-button--block"
+            type="submit"
+          >
+            Send File →
+          </button>
+        </div>
+      </form>
+
+      <footer>
+        <p class="meta">Simple. Private. Fast.</p>
       </footer>
-      <!-- END: Footer -->
     </main>
-    <!-- END: MainContainer -->
-    <!-- BEGIN: Logic -->
-    <script data-purpose="event-handlers">
+
+    <script>
       const dropZone = document.getElementById("dropZone");
       const fileInput = document.getElementById("fileInput");
 
       // Trigger file input on click
       dropZone.addEventListener("click", () => fileInput.click());
 
-      // Simple drag and drop visual feedback
       ["dragenter", "dragover"].forEach((eventName) => {
-        dropZone.addEventListener(
-          eventName,
-          (e) => {
-            e.preventDefault();
-            dropZone.classList.add("dragover");
-          },
-          false,
-        );
+        dropZone.addEventListener(eventName, (e) => {
+          e.preventDefault();
+          dropZone.classList.add("dragover");
+        });
       });
 
       ["dragleave", "drop"].forEach((eventName) => {
-        dropZone.addEventListener(
-          eventName,
-          (e) => {
-            e.preventDefault();
-            dropZone.classList.remove("dragover");
-          },
-          false,
-        );
+        dropZone.addEventListener(eventName, (e) => {
+          e.preventDefault();
+          dropZone.classList.remove("dragover");
+        });
       });
 
       function showFileLoaded(filename) {
+        dropZone.classList.remove("invalid");
         dropZone.innerHTML = `
-          <div class="text-center space-y-4">
-            <div class="p-3 bg-green-100 rounded-full inline-block">
-              <svg class="h-6 w-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                <path d="M5 13l4 4L19 7" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
-              </svg>
-            </div>
-            <div>
-              <p class="text-nord-0 font-medium">${filename}</p>
-              <p class="text-nord-3 text-xs mt-1">File loaded</p>
-            </div>
-            <button class="mt-4 bg-nord-10 hover:bg-nord-9 text-white font-bold py-2 px-4 rounded-theme shadow-sm transition-colors duration-200 text-xs uppercase tracking-widest">
-              Change File
-            </button>
-          </div>
+          <div class="spot-frame__in"></div>
+          <span class="spot-label">File Loaded</span>
+          <p class="lead file-name"></p>
+          <button type="button" class="spot-button">Change File</button>
         `;
+        dropZone.querySelector(".file-name").textContent = filename;
         dropZone.querySelector("button").addEventListener("click", (e) => {
           e.stopPropagation();
           fileInput.click();
         });
       }
 
-      // Handle file selection
       fileInput.addEventListener("change", (e) => {
         if (e.target.files.length) {
           showFileLoaded(e.target.files[0].name);
@@ -209,6 +173,5 @@
         }
       });
     </script>
-    <!-- END: Logic -->
   </body>
 </html>

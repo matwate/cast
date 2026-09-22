@@ -4,91 +4,87 @@
   <head>
     <meta charset="utf-8" />
     <meta content="width=device-width, initial-scale=1.0" name="viewport" />
-    <link rel="stylesheet" href="/assets/css/tailwind.css" />
-    <link
-      href="https://fonts.googleapis.com/css2?family=Public+Sans:wght@300;400;500;600;700&amp;display=swap"
-      rel="stylesheet"
-    />
-    <link
-      href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
-      rel="stylesheet"
-    />
-    <link
-      href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
-      rel="stylesheet"
-    />
     <title>cast - connection</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;600;700;800&family=Space+Mono:wght@400;700&display=swap"
+    />
+    <link rel="stylesheet" href="/assets/spot.css" />
+    <style>
+      .page {
+        max-width: 1024px;
+      }
+      .connect {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) auto;
+        gap: var(--space-5);
+        align-items: center;
+      }
+      .connect__text {
+        display: flex;
+        flex-direction: column;
+        gap: var(--space-4);
+      }
+      .qr {
+        display: block;
+        width: 256px;
+        height: 256px;
+        padding: var(--space-3);
+        background: var(--paper);
+      }
+      .actions {
+        display: flex;
+        flex-wrap: wrap;
+        gap: var(--space-3);
+      }
+      @media (max-width: 768px) {
+        .connect {
+          grid-template-columns: minmax(0, 1fr);
+        }
+        .connect .spot-frame {
+          justify-self: start;
+        }
+      }
+    </style>
   </head>
-  <body
-    class="bg-background-light dark:bg-background-dark font-display text-nord-text dark:text-slate-100 antialiased"
-  >
-    <div
-      class="relative flex h-auto min-h-screen w-full flex-col overflow-x-hidden"
-    >
-      <div class="layout-container flex h-full grow flex-col">
-        <div class="px-6 md:px-40 flex flex-1 justify-center py-8">
-          <div
-            class="layout-content-container flex flex-col max-w-[480px] flex-1"
-          >
-            <!--  Navigation -->
-            <div class="flex px-4 py-2 justify-center mb-8">
-              <button
-                onclick="window.open('{{PRESENTATION_URL}}', '_blank')"
-                class="flex min-w-[84px] cursor-pointer items-center justify-center rounded-xl h-14 px-5 bg-primary text-white text-base font-bold transition-transform active:scale-[0.98] shadow-md shadow-primary/20"
-              >
-                <span class="truncate">Go to Slides</span>
-              </button>
-            </div>
-            <!-- Main Connection Card -->
-            <div class="px-4 py-6 @container">
-              <div
-                class="flex flex-col items-center justify-center rounded-2xl shadow-sm bg-white dark:bg-nord-dark border border-slate-200 dark:border-slate-700 p-8"
-              >
-                <div
-                  class="w-full max-w-[240px] aspect-square bg-slate-50 dark:bg-background-dark rounded-xl flex items-center justify-center border border-slate-100 dark:border-slate-800 mb-6 overflow-hidden"
-                >
-                  <img
-                    alt="QR Code for connection"
-                    class="w-48 h-48 opacity-90 dark:invert"
-                    data-alt="Modern QR code for remote slide connection"
-                    src="{{QR_URL}}"
-                  />
-                </div>
-                <div
-                  class="flex flex-col items-center gap-2 text-center w-full"
-                >
-                  <p
-                    class="text-nord-text dark:text-white text-3xl font-bold tracking-widest"
-                  >
-                    {{CAST_CODE}}
-                  </p>
-                  <div class="flex items-center gap-2 mt-2">
-                    <p
-                      class="text-slate-500 dark:text-slate-400 text-sm font-normal"
-                    >
-                      Scan or Enter Code to View Slides
-                    </p>
-                  </div>
-                </div>
-              </div>
-            </div>
-            <!-- Action Buttons -->
-            <div class="flex justify-center mt-6">
-              <div
-                class="flex flex-1 gap-4 max-w-[480px] flex-col items-stretch px-4 py-3"
-              >
-                <button
-                  onclick="window.open('{{CONTROLS_URL}}', '_blank')"
-                  class="flex min-w-[84px] cursor-pointer items-center justify-center rounded-xl h-14 px-5 bg-primary text-white text-base font-bold transition-transform active:scale-[0.98] shadow-md shadow-primary/20"
-                >
-                  <span class="truncate">Go to Controls</span>
-                </button>
-              </div>
-            </div>
-            <!-- Footer Info -->
+  <body>
+    <main class="page">
+      <span class="spot-label">Cast</span>
+
+      <div class="connect">
+        <section class="spot-section connect__text">
+          <span class="spot-label" style="margin-bottom: 0">Cast Code</span>
+          <h1 class="spot-hero" style="overflow-wrap: anywhere">{{CAST_CODE}}</h1>
+          <p class="lead">Scan or enter the code to connect your remote.</p>
+          <div class="actions">
+            <button
+              onclick="window.open('{{PRESENTATION_URL}}', '_blank')"
+              class="spot-button spot-button--accent"
+              type="button"
+            >
+              Go to Slides →
+            </button>
+            <button
+              onclick="window.open('{{CONTROLS_URL}}', '_blank')"
+              class="spot-button spot-button--solid"
+              type="button"
+            >
+              Go to Controls →
+            </button>
           </div>
+        </section>
+
+        <div class="spot-frame">
+          <div class="spot-frame__in"></div>
+          <img
+            class="qr"
+            alt="QR code for connecting the remote"
+            src="{{QR_URL}}"
+          />
         </div>
       </div>
-    </div>
+    </main>
   </body>
 </html>

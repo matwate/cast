@@ -4,7 +4,9 @@ import gleam/bytes_tree
 import gleam/erlang/process
 import gleam/list
 import gleam/option.{None, Some}
+import gleam/result
 import gleam/string
+import gleam/uri
 import mist
 import simplifile
 import store
@@ -35,7 +37,12 @@ pub fn main() {
 fn routes(req: Request, ctx: types.Context) -> Response {
   use req <- web_middleware(req)
 
-  case wisp.path_segments(req) {
+  // Decode %20 etc. so files with spaces in their names resolve.
+  let segments =
+    wisp.path_segments(req)
+    |> list.map(fn(s) { uri.percent_decode(s) |> result.unwrap(s) })
+
+  case segments {
     ["convert"] -> document.handle_convert(req, ctx)
     [] -> serve_index()
 

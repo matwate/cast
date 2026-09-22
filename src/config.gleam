@@ -14,11 +14,11 @@ pub type Config {
 
 pub fn get_config() -> Config {
   // WebSocket URL should be passed via environment variable
-  // Example: export WEBSOCKET_URL="ws://matwa.is-cool.dev/ws/"
+  // Example: export WEBSOCKET_URL="ws://matwa.dev/ws/"
   // Default: ws://localhost:8080
   // Set this in your .bashrc or before running the application
 
-  let ws_url = "ws://cast.matwa.is-cool.dev/ws/"
+  let ws_url = "ws://cast.matwa.dev/ws/"
   Config(
     server_host: "0.0.0.0",
     server_port: 6767,
