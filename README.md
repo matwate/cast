@@ -63,6 +63,19 @@ node websocket_relay.js &
 gleam run
 ```
 
+## HTML decks (manim-slides)
+
+Any Reveal.js deck can be uploaded as `.html`; cast adds
+`<script src="/assets/cast-remote.js" data-cast-code="...">` before `</body>`
+and serves it as is. Assets must be inside the file, so for manim-slides use:
+
+```bash
+manim-slides convert --one-file MyScene talk.html
+```
+
+Fill in the optional cast code on the upload form to keep the same code across
+re-uploads. Phones can join at `/join`.
+
 ## Environment Variables
 
 | Variable | Description | Default |

@@ -1,0 +1,70 @@
+<!doctype html>
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <title>cast - Join</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;600;700;800&family=Space+Mono:wght@400;700&display=swap"
+    />
+    <link rel="stylesheet" href="/assets/spot.css" />
+    <style>
+      form {
+        display: flex;
+        flex-direction: column;
+        gap: var(--space-4);
+      }
+      #code {
+        font-family: var(--font-mono);
+        font-size: 22px;
+        line-height: 30px;
+        letter-spacing: 0.08em;
+      }
+      .error:empty {
+        display: none;
+      }
+    </style>
+  </head>
+  <body>
+    <main class="page">
+      <header style="display: flex; flex-direction: column; gap: var(--space-4)">
+        <span class="spot-label">Cast</span>
+        <h1 class="spot-hero">Take the<br />remote.</h1>
+        <p class="lead">Enter the code shown on the presenter's screen.</p>
+      </header>
+
+      <form action="/join" method="GET">
+        <section class="spot-section">
+          <label class="spot-label" for="code">Cast Code</label>
+          <input
+            class="field"
+            id="code"
+            name="code"
+            value="{{CODE}}"
+            placeholder="e.g. aB3xZ9"
+            required
+            maxlength="32"
+            pattern="[A-Za-z0-9_\-]+"
+            autocomplete="off"
+            autocapitalize="off"
+            autocorrect="off"
+            spellcheck="false"
+            autofocus
+          />
+          <p class="meta error" style="margin-top: var(--space-2)">{{ERROR}}</p>
+        </section>
+        <button class="spot-button spot-button--accent spot-button--block" type="submit">
+          Connect →
+        </button>
+      </form>
+
+      <footer>
+        <a class="spot-button" href="/upload">Presenter? Sign In →</a>
+      </footer>
+    </main>
+  </body>
+</html>

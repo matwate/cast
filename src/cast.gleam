@@ -44,7 +44,8 @@ fn routes(req: Request, ctx: types.Context) -> Response {
 
   case segments {
     ["convert"] -> document.handle_convert(req, ctx)
-    [] -> serve_index()
+    [] | ["upload"] -> serve_index()
+    ["join"] -> serve_join_page(req, ctx)
 
     ["view", username, filename] -> serve_view_page(username, filename)
     ["view", code] -> serve_view_connection_page(code, ctx)
@@ -61,7 +62,8 @@ fn routes(req: Request, ctx: types.Context) -> Response {
 fn handle_cast_code(code: String, ctx: types.Context) -> Response {
   case store.get(ctx.store, code) {
     Some(#(username, filename)) -> {
-      let redirect_url = "/view/" <> username <> "/" <> filename
+      let redirect_url =
+        "/view/" <> username <> "/" <> document.view_filename(filename)
       wisp.redirect(redirect_url)
     }
     None -> wisp.html_response("Invalid or expired cast code", 404)
@@ -85,11 +87,7 @@ fn serve_view_connection_page(code: String, ctx: types.Context) -> Response {
     Some(#(username, filename)) -> {
       use <- wisp.rescue_crashes
 
-      // Get HTML extension based on original filename
-      let html_filename = case string.ends_with(filename, ".pdf") {
-        True -> string.replace(filename, ".pdf", ".html")
-        False -> string.replace(filename, ".pptx", ".html")
-      }
+      let html_filename = document.view_filename(filename)
 
       // Construct URLs
       let qr_url = "/qr/" <> code
@@ -129,8 +127,48 @@ fn serve_controls_page(code: String, ctx: types.Context) -> Response {
         Error(_) -> wisp.html_response("Controls page not found", 404)
       }
     }
-    None -> wisp.html_response("Invalid or expired cast code", 404)
+    None -> wisp.redirect("/join?code=" <> uri.percent_encode(code))
   }
+}
+
+// GET /join shows the code form; GET /join?code=X sends a known code to its
+// controls and re-shows the form with an error otherwise.
+fn serve_join_page(req: Request, ctx: types.Context) -> Response {
+  use <- wisp.rescue_crashes
+
+  let code = case list.key_find(wisp.get_query(req), "code") {
+    Ok(code) -> string.trim(code)
+    Error(_) -> ""
+  }
+  let known =
+    document.is_valid_cast_code(code) && store.get(ctx.store, code) != None
+
+  case known {
+    True -> wisp.redirect("/controls/" <> code)
+    False ->
+      case simplifile.read("./public/join.html") {
+        Ok(content) -> {
+          let error = case code {
+            "" -> ""
+            _ -> "No cast is running with that code."
+          }
+          content
+          |> string.replace("{{ERROR}}", error)
+          |> string.replace("{{CODE}}", html_escape(code))
+          |> wisp.html_response(200)
+        }
+        Error(_) -> wisp.html_response("Join page not found", 500)
+      }
+  }
+}
+
+fn html_escape(text: String) -> String {
+  text
+  |> string.replace("&", "&amp;")
+  |> string.replace("<", "&lt;")
+  |> string.replace(">", "&gt;")
+  |> string.replace("\"", "&quot;")
+  |> string.replace("'", "&#39;")
 }
 
 fn serve_qr_code(code: String) -> Response {

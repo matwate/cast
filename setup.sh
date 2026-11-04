@@ -68,6 +68,7 @@ echo "📄 Copying HTML files to public..."
 cp index.html public/
 cp controls.html public/
 cp view.html public/
+cp join.html public/
 
 echo "✓ Setup complete!"
 echo ""

@@ -61,7 +61,8 @@
         <span class="spot-label">Cast</span>
         <h1 class="spot-hero">Remote<br />for your<br />slides.</h1>
         <p class="lead">
-          Upload a PDF or PPTX, then drive it from your phone.
+          Upload a PDF, PPTX or Reveal.js HTML deck, then drive it from your
+          phone.
         </p>
       </header>
 
@@ -80,11 +81,30 @@
         </section>
 
         <section class="spot-section">
+          <label class="spot-label" for="castCode">Cast Code</label>
+          <input
+            name="cast_code"
+            class="field"
+            id="castCode"
+            placeholder="Leave empty for a random one"
+            maxlength="32"
+            pattern="[A-Za-z0-9_\-]+"
+            title="Letters, numbers, - and _"
+            autocomplete="off"
+            autocapitalize="off"
+            spellcheck="false"
+          />
+          <p class="meta" style="margin-top: var(--space-2)">
+            Optional. Reuse the same code to keep one remote across uploads.
+          </p>
+        </section>
+
+        <section class="spot-section">
           <span class="spot-label">Upload File</span>
           <div class="spot-frame drop-zone" id="dropZone">
             <div class="spot-frame__in"></div>
             <p class="lead">Drop your file here</p>
-            <p class="meta">or click to browse · PDF, PPTX</p>
+            <p class="meta">or click to browse · PDF, PPTX, HTML</p>
           </div>
           <p class="meta error-note">* Choose a file</p>
           <input
@@ -92,7 +112,7 @@
             hidden
             id="fileInput"
             type="file"
-            accept=".pptx, .pdf, application/pdf, application/vnd.openxmlformats-officedocument.presentationml.presentation"
+            accept=".pptx, .pdf, .html, .htm, application/pdf, application/vnd.openxmlformats-officedocument.presentationml.presentation, text/html"
           />
         </section>
 

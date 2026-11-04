@@ -22,10 +22,13 @@ type ThisThingError {
   NoUsername
   NoFile
   UnsupportedFileFormat
+  InvalidCastCode
   FailedGenerating(why: List(#(String, String)))
 }
 
 pub fn handle_convert(req: wisp.Request, ctx: types.Context) -> wisp.Response {
+  // Single-file HTML decks (videos inlined) get big.
+  let req = wisp.set_max_files_size(req, 512_000_000)
   use formdata <- wisp.require_form(req)
   let result: Result(#(String, String, String), ThisThingError) = {
     use username <- result.try(
@@ -40,14 +43,23 @@ pub fn handle_convert(req: wisp.Request, ctx: types.Context) -> wisp.Response {
     let filename = file.file_name
     let path = file.path
 
-    let cast_code = wisp.random_string(6)
-    store.set(ctx.store, username, filename, cast_code)
+    // An explicit cast code lets a deck keep the same code across uploads.
+    use cast_code <- result.try(
+      case list.key_find(formdata.values, "cast_code") {
+        Ok(code) -> string.trim(code)
+        Error(_) -> ""
+      }
+      |> choose_cast_code,
+    )
 
     use _ <- result.try(case determine_filetype(filename) {
       Pdf -> convert_pdf(filename, path, username, cast_code)
       Pptx -> convert_pptx(filename, path, username, cast_code)
+      Html -> convert_html(filename, path, username, cast_code)
       Unsupported -> Error(UnsupportedFileFormat)
     })
+
+    store.set(ctx.store, username, filename, cast_code)
 
     use _ <- result.try(
       generate_qr_code(cast_code)
@@ -68,12 +80,92 @@ pub fn handle_convert(req: wisp.Request, ctx: types.Context) -> wisp.Response {
         NoFile -> wisp.html_response("No File", 400)
         UnsupportedFileFormat ->
           wisp.html_response("Could not determine file format", 442)
+        InvalidCastCode ->
+          wisp.html_response(
+            "Cast codes can only use letters, numbers, - and _ (max 32)",
+            400,
+          )
         FailedGenerating(why) ->
           wisp.html_response(
             "Unprocessable file format: " <> string.inspect(why),
             422,
           )
       }
+  }
+}
+
+fn choose_cast_code(code: String) -> Result(String, ThisThingError) {
+  case code {
+    "" -> Ok(wisp.random_string(6))
+    _ ->
+      case is_valid_cast_code(code) {
+        True -> Ok(code)
+        False -> Error(InvalidCastCode)
+      }
+  }
+}
+
+pub fn is_valid_cast_code(code: String) -> Bool {
+  let length = string.length(code)
+  length > 0
+  && length <= 32
+  && code
+  |> string.to_graphemes
+  |> list.all(fn(c) {
+    string.contains(
+      "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-_",
+      c,
+    )
+  })
+}
+
+/// The name the generated presentation is saved under in ./view/<username>/.
+pub fn view_filename(filename: String) -> String {
+  case determine_filetype(filename) {
+    Pdf -> string.replace(filename, ".pdf", ".html")
+    Pptx -> string.replace(filename, ".pptx", ".html")
+    Html | Unsupported -> filename
+  }
+}
+
+fn remote_script_tag(cast_code: String) -> String {
+  "<script src='/assets/cast-remote.js' data-cast-code='"
+  <> cast_code
+  <> "'></script>"
+}
+
+// Uploaded HTML is assumed to already be a Reveal.js deck (e.g. manim-slides),
+// so it only needs the remote script before the closing </body>.
+fn convert_html(
+  filename: String,
+  path: String,
+  username: String,
+  cast_code: String,
+) -> Result(Nil, ThisThingError) {
+  let fail = fn(why) { Error(FailedGenerating([#(why, "simplifile")])) }
+  case simplifile.read(path) {
+    Error(_) -> fail("Failed to read uploaded HTML")
+    Ok(html) -> {
+      let tag = remote_script_tag(cast_code)
+      let html = case string.split(html, "</body>") |> list.reverse {
+        [last, ..rest] if rest != [] ->
+          string.join(list.reverse(rest), "</body>") <> tag <> "</body>" <> last
+        _ -> html <> tag
+      }
+      case simplifile.create_directory_all(view_output_dir <> username) {
+        Error(_) -> fail("Failed to create view directory")
+        Ok(_) ->
+          case
+            simplifile.write(
+              view_output_dir <> username <> "/" <> filename,
+              html,
+            )
+          {
+            Ok(_) -> Ok(Nil)
+            Error(_) -> fail("Failed to write HTML file")
+          }
+      }
+    }
   }
 }
 
@@ -290,53 +382,9 @@ fn generate_html_from_pngs(
         margin: 0;
         object-fit: contain;
       }
-      .connection-status {
-        position: fixed;
-        top: 16px;
-        right: 16px;
-        z-index: 9999;
-        background: rgba(0, 0, 0, 0.8);
-        color: white;
-        padding: 8px 16px;
-        border-radius: 8px;
-        display: flex;
-        align-items: center;
-        gap: 8px;
-        font-size: 12px;
-        font-weight: 500;
-        transition: all 0.3s ease;
-        backdrop-filter: blur(8px);
-      }
-      .connection-status.connected {
-        background: rgba(34, 197, 94, 0.9);
-      }
-      .connection-status.disconnected {
-        background: rgba(239, 68, 68, 0.9);
-      }
-      .connection-status.connecting {
-        background: rgba(234, 179, 8, 0.9);
-      }
-      .connection-status .status-icon {
-        font-size: 16px;
-      }
-      .connection-status.connecting .status-icon {
-        animation: pulse 1.5s ease-in-out infinite;
-      }
-      @keyframes pulse {
-        0%, 100% { opacity: 1; }
-        50% { opacity: 0.5; }
-      }
-      .connection-status.hidden {
-        opacity: 0;
-        pointer-events: none;
-      }
     </style>
   </head>
   <body>
-    <div id='connectionStatus' class='connection-status connecting'>
-      <span class='status-icon'>●</span>
-      <span class='status-text'>Connecting to remote...</span>
-    </div>
     <div class='reveal'>
       <div class='slides'>" <> slides_html <> "</div>
     </div>
@@ -349,87 +397,7 @@ fn generate_html_from_pngs(
         disableLayout: true,
       });
     </script>
-    <script>
-      (function() {
-        const protocol = window.location.protocol === 'https:' ? 'wss://' : 'ws://';
-        const WS_URL = protocol + 'cast.matwa.dev/ws/?cast_code=" <> cast_code <> "&type=presentation';
-        let socket = null;
-        let reconnectTimeout = null;
-
-        function updateConnectionStatus(status) {
-          const statusEl = document.getElementById('connectionStatus');
-          const statusText = statusEl.querySelector('.status-text');
-          
-          statusEl.className = 'connection-status ' + status;
-          
-          switch(status) {
-            case 'connecting':
-              statusText.textContent = 'Connecting to remote...';
-              break;
-            case 'connected':
-              statusText.textContent = 'Remote control active';
-              break;
-            case 'disconnected':
-              statusText.textContent = 'Remote control disconnected - reconnecting...';
-              break;
-          }
-        }
-
-        function connect() {
-          if (reconnectTimeout) {
-            clearTimeout(reconnectTimeout);
-          }
-          
-          updateConnectionStatus('connecting');
-          socket = new WebSocket(WS_URL);
-
-          socket.onopen = () => {
-            console.log('Connected to control server');
-            updateConnectionStatus('connected');
-            broadcastState();
-          };
-
-          socket.onmessage = (event) => {
-            const data = JSON.parse(event.data);
-            if (data.type === 'cmd') {
-              if (data.action === 'next') Reveal.next();
-              if (data.action === 'prev') Reveal.prev();
-            }
-          };
-
-          socket.onclose = () => {
-            console.log('Disconnected from control server, reconnecting in 3s...');
-            updateConnectionStatus('disconnected');
-            reconnectTimeout = setTimeout(connect, 3000);
-          };
-
-          socket.onerror = (error) => {
-            console.error('WebSocket error:', error);
-            updateConnectionStatus('disconnected');
-          };
-        }
-
-        function broadcastState() {
-          if (socket && socket.readyState === WebSocket.OPEN) {
-            const indices = Reveal.getIndices();
-            const total = Reveal.getTotalSlides();
-            socket.send(JSON.stringify({
-              type: 'state',
-              indexh: indices.h,
-              indexv: indices.v,
-              total: total
-            }));
-          }
-        }
-
-        Reveal.on('slidechanged', broadcastState);
-        Reveal.on('fragmentshown', broadcastState);
-        Reveal.on('fragmenthidden', broadcastState);
-        
-        // Start connection after Reveal is ready
-        setTimeout(connect, 1000);
-      })();
-    </script>
+    " <> remote_script_tag(cast_code) <> "
   </body>
 </html>"
   Ok(html)
@@ -507,13 +475,20 @@ fn compress_pngs(dir: String) -> Result(Nil, List(#(String, String))) {
 type Filetype {
   Pdf
   Pptx
+  Html
   Unsupported
 }
 
-fn determine_filetype(filename) -> Filetype {
-  case string.ends_with(filename, ".pdf"), string.ends_with(filename, ".pptx") {
-    True, _ -> Pdf
-    _, True -> Pptx
-    _, _ -> Unsupported
+fn determine_filetype(filename: String) -> Filetype {
+  let lower = string.lowercase(filename)
+  case
+    string.ends_with(lower, ".pdf"),
+    string.ends_with(lower, ".pptx"),
+    string.ends_with(lower, ".html") || string.ends_with(lower, ".htm")
+  {
+    True, _, _ -> Pdf
+    _, True, _ -> Pptx
+    _, _, True -> Html
+    _, _, _ -> Unsupported
   }
 }
