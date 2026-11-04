@@ -5,6 +5,16 @@ const wss = new WebSocket.Server({ port: PORT });
 
 const presentations = new Map();
 const controllers = new Map();
+// Last slide state per cast code, so remotes that join late show the right slide.
+const lastState = new Map();
+
+function parse(data) {
+  try {
+    return JSON.parse(data);
+  } catch {
+    return null;
+  }
+}
 
 console.log(`WebSocket relay server running on ws://localhost:${PORT}`);
 
@@ -43,9 +53,10 @@ wss.on("connection", (ws, req) => {
     presentations.get(castCode).push(ws);
 
     ws.on("message", (data) => {
-      const message = JSON.parse(data);
+      const message = parse(data);
 
-      if (message.type === "state") {
+      if (message?.type === "state") {
+        lastState.set(castCode, message);
         broadcastToControllers(castCode, message);
         broadcastToPresentations(castCode, message, ws);
       }
@@ -65,10 +76,14 @@ wss.on("connection", (ws, req) => {
     }
     controllers.get(castCode).push(ws);
 
-    ws.on("message", (data) => {
-      const message = JSON.parse(data);
+    if (lastState.has(castCode)) {
+      ws.send(JSON.stringify(lastState.get(castCode)));
+    }
 
-      if (message.type === "cmd") {
+    ws.on("message", (data) => {
+      const message = parse(data);
+
+      if (message?.type === "cmd") {
         broadcastToPresentations(castCode, message);
       }
     });
